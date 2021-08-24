@@ -59,8 +59,8 @@ done
 
 # Merge with white-listed remotes (pull requests etc)
 # Space separated list, each following the 'login/repo/branch' format
+#    Octoton/VinylMusicPlayer/separate_playingqueue_in_musicservice
 alien_branches="
-    Octoton/VinylMusicPlayer/separate_playingqueue_in_musicservice
 "
 
 for alien_branch in ${alien_branches}; do
