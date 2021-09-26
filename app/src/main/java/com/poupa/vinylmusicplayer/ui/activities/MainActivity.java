@@ -1,5 +1,8 @@
 package com.poupa.vinylmusicplayer.ui.activities;
 
+import android.app.AlertDialog;
+import android.content.ComponentName;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
@@ -12,8 +15,10 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -46,9 +51,12 @@ import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.folders.FoldersFragm
 import com.poupa.vinylmusicplayer.ui.fragments.mainactivity.library.LibraryFragment;
 import com.poupa.vinylmusicplayer.util.MusicUtil;
 import com.poupa.vinylmusicplayer.util.PreferenceUtil;
+import com.poupa.vinylmusicplayer.util.Util;
 import com.sothree.slidinguppanel.SlidingUpPanelLayout;
 
 import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class MainActivity extends AbsSlidingMusicPanelActivity {
 
@@ -69,6 +77,9 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
 
     private boolean blockRequestPermissions;
     private boolean scanning;
+    private MenuItem mItemClosePlay;
+    private int mSecondLeft;
+    private Timer mTimer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -170,6 +181,7 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
         navigationView.setNavigationItemSelectedListener(menuItem -> {
             drawerLayout.closeDrawers();
             final int itemId = menuItem.getItemId();
+
             if (itemId == R.id.nav_library) {
                 new Handler().postDelayed(() -> setMusicChooser(LIBRARY), 200);
             } else if (itemId == R.id.nav_folders) {
@@ -181,6 +193,18 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
                 }, 200);
             } else if (itemId == R.id.action_reset_discography) {
                 Discography.getInstance().triggerSyncWithMediaStore(true);
+            } else if (itemId == R.id.action_time_close_play) {
+                if(mSecondLeft == 0){
+//                    mItemClosePlay = menuItem;
+//                    mSecondLeft = 60;
+                    //SetTimerClosePlay(menuItem, 60);
+                    setTimeDialog(menuItem);
+                }
+                else{
+                    CancelTimeClosePlay(false);
+                }
+
+
             } else if (itemId == R.id.nav_settings) {
                 new Handler().postDelayed(() -> startActivity(new Intent(MainActivity.this, SettingsActivity.class)), 200);
             } else if (itemId == R.id.nav_about) {
@@ -375,4 +399,97 @@ public class MainActivity extends AbsSlidingMusicPanelActivity {
     public interface MainActivityFragmentCallbacks {
         boolean handleBackPress();
     }
+
+    public void setTimeDialog(MenuItem item){
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle(getResources().getString(R.string.time_input_seconds));    //设置对话框标题
+        final EditText edit = new EditText(this);
+        builder.setView(edit);
+        builder.setPositiveButton(getResources().getString(R.string.time_ok), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+
+                if(Util.isNumericZidai(edit.getText().toString())){
+                    Toast.makeText(MainActivity.this,   getResources().getString(R.string.time_success) + ":" + edit.getText().toString() + getResources().getString(R.string.time_seconds_pause), Toast.LENGTH_LONG).show();
+                    SetTimerClosePlay(item,Integer.parseInt(edit.getText().toString()));
+                }
+                else{
+                    Toast.makeText(MainActivity.this, getResources().getString(R.string.time_fail) + ":" + getResources().getString(R.string.time_illegal_figures), Toast.LENGTH_LONG).show();
+                }
+
+            }
+        });
+        builder.setNegativeButton(getResources().getString(R.string.time_cancel), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Toast.makeText(MainActivity.this, getResources().getString(R.string.time_cancel), Toast.LENGTH_SHORT).show();
+            }
+        });
+        AlertDialog dialog = builder.create();  //创建对话框
+        dialog.setCanceledOnTouchOutside(true); //设置弹出框失去焦点是否隐藏,即点击屏蔽其它地方是否隐藏
+        dialog.show();
+    }
+    public void CancelTimeClosePlay(boolean isClose){
+        mTimer.cancel();
+        mItemClosePlay.setTitle(getResources().getString(R.string.time_close_play));
+        //TimeClosePlay timeClosePlay = new TimeClosePlay(MainActivity.this);
+        //timeClosePlay.setClosePlay(1);
+        mSecondLeft = 0;
+        if(isClose){
+            ComponentName serviceName = new ComponentName(this, MusicService.class);
+            Intent intent = new Intent(MusicService.ACTION_TOGGLE_PAUSE);
+            intent.setComponent(serviceName);
+            startService(intent);
+        }
+    }
+    public void SetTimerClosePlay(MenuItem item, int sec){
+        mItemClosePlay  = item;
+        mSecondLeft = sec;
+        mTimer = new Timer();
+        TimerTask task = new TimerTask() {
+
+            @Override
+            public void run() {
+                // TODO Auto-generated method stub
+                runOnUiThread(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        // TODO Auto-generated method stub
+                        mSecondLeft--;
+                        if (mSecondLeft <= 0) {
+                            CancelTimeClosePlay(true);
+                        }
+                        else{
+                            mItemClosePlay.setTitle(getResources().getString(R.string.time_close_play) + "(" + mSecondLeft + ")");
+                        }
+
+                    }
+                });
+            }
+        };
+        mTimer.schedule(task, 1000, 1000);
+    }
+//    TimerTask task = new TimerTask() {
+//
+//        @Override
+//        public void run() {
+//            // TODO Auto-generated method stub
+//            runOnUiThread(new Runnable() {
+//
+//                @Override
+//                public void run() {
+//                    // TODO Auto-generated method stub
+//                    secondLeft--;
+//                    if (secondLeft <= 0) {
+//                        CancelTimeClosePlay();
+//                    }
+//                    else{
+//                        mItemClosePlay.setTitle(getResources().getString(R.string.time_close_play) + "(" + secondLeft + ")");
+//                    }
+//
+//                }
+//            });
+//        }
+//    };
 }

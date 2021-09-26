@@ -68,4 +68,13 @@ public class Util {
     public static boolean isLandscape(@NonNull final Resources resources) {
         return resources.getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE;
     }
+    public static boolean isNumericZidai(String str) {
+        for (int i = 0; i < str.length(); i++) {
+            System.out.println(str.charAt(i));
+            if (!Character.isDigit(str.charAt(i))) {
+                return false;
+            }
+        }
+        return true;
+    }
 }

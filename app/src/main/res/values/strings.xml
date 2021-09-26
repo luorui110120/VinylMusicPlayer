@@ -326,6 +326,15 @@
     <string name="action_scan_directory">Scan directory</string>
     <string name="scan_media">Scan media</string>
     <string name="reset_discography">Rescan library</string>
+    <string name="time_close_play">Time Close Play</string>
+    <string name="time_input_seconds">Please How many seconds</string>
+    <string name="time_ok">OK</string>
+    <string name="time_success">Success</string>
+    <string name="time_fail">Fail</string>
+    <string name="time_illegal_figures">Illegal figures!</string>
+    <string name="time_seconds_pause">seconds pause!</string>
+    <string name="time_cancel">cancel</string>
+
     <string name="none">None</string>
     <string name="track">Track</string>
     <string name="label_with_rg_info">With ReplayGain Tags :</string>

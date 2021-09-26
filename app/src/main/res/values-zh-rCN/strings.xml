@@ -314,6 +314,14 @@
     <string name="dialog_ringtone_title">设置为铃声</string>
     <string name="dialog_ringtone_message">在设置铃声前请允许Vinyl音乐播放器在下一屏修改系统设置。</string>
     <string name="reset_discography">重新扫描媒体库</string>
+    <string name="time_close_play">定时暂停</string>
+    <string name="time_input_seconds">请输入多少秒</string>
+    <string name="time_ok">确定</string>
+    <string name="time_success">成功</string>
+    <string name="time_fail">失败</string>
+    <string name="time_illegal_figures">输入数字错误!</string>
+    <string name="time_seconds_pause">秒后暂停!</string>
+    <string name="time_cancel">取消</string>
     <string name="none">无</string>
     <string name="track">音轨</string>
     <string name="label_with_rg_info">有ReplayGain标记：</string>
