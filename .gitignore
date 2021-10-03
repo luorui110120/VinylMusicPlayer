@@ -45,3 +45,4 @@ tags
 .DS_Store
 
 app/release/
+output-metadata.json
